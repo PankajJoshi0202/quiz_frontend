@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Include Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css"
+    />
+    <style>
+      /* Your custom CSS styles here */
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      header {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 0;
+      }
+
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      nav ul li {
+        display: inline;
+        margin-right: 20px;
+      }
+
+      nav ul li a {
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      h2 {
+        margin-top: 20px;
+      }
+
+      form {
+        margin-top: 10px;
+      }
+
+      button {
+        margin-top: 10px;
+      }
+    </style>
+    <title>Admin Page</title>
+  </head>
+  <body>
+    <header>
+      <!-- <nav>
+        <ul>
+          <li><a href="#" id="addQuizLink">Add Quiz</a></li>
+          <li><a href="#" id="showQuizLink">Show Quiz</a></li>
+        </ul>
+      </nav> -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Quiz App-Minor Project</a>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="#" id="addQuizLink">Add Quiz</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" id="showQuizLink">Show Quiz</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" id="generateQuizLink"
+                  >Generate Quiz</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div id="user-info" class="ml-auto">
+            <span id="admin-username" class="text-white"></span>
+            <button id="logout-button" class="btn btn-danger">Logout</button>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div id="addQuizForm" class="hidden">
+      <h2>Add Quiz</h2>
+      <form id="quizForm">
+        <input type="text" placeholder="Quiz Topic" id="quizTopic" />
+        <div id="questionsContainer">
+          <!-- Quiz questions will be added here -->
+        </div>
+        <button type="button" id="addQuestion">Add Question</button>
+        <button type="button" id="submitQuiz">Submit Quiz</button>
+      </form>
+    </div>
+    <div id="showQuiz" class="hidden">
+      <h2>Show Quiz</h2>
+      <div id="quizTopics">
+        <!-- Quiz topics will be displayed here -->
+      </div>
+    </div>
+    <!-- <div id="generateQuiz" class="hidden">
+      <h2>Generate Quiz</h2>
+      <form id="genQuizForm">
+        <input type="text" placeholder="Quiz Topic" id="quizTopic" />
+        <input type="number" placeholder="No. of Question" />
+
+        <button type="button" id="genQuiz">Generate Quiz</button>
+        <button type="button" id="submitQuiz">Add Quiz</button>
+        <div id="showGenQuiz"></div>
+      </form>
+    </div> -->
+
+    <div id="generateQuiz" class="hidden">
+      <h2>Generate Quiz</h2>
+      <form id="genQuizForm">
+        <input type="text" placeholder="Quiz Topic" id="genQuizTopic" />
+        <input type="number" placeholder="No. of Question" id="noOfQuestions" />
+
+        <button type="button" id="genQuiz">Generate Quiz</button>
+        <button type="button" id="genSubmitQuiz">Add Quiz</button>
+        <div id="showGenQuiz"></div>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Retrieve the admin username from your server or wherever it's stored
+        const adminUsername = "Admin"; // Replace with the actual admin username
+
+        // Find elements for username and logout button
+        const adminUsernameElement = document.getElementById("admin-username");
+        const logoutButton = document.getElementById("logout-button");
+
+        // Display the admin username
+        adminUsernameElement.textContent = `Username: ${adminUsername}`;
+
+        // Add a click event listener to the logout button
+        logoutButton.addEventListener("click", function () {
+          window.location.href = "loginPage.html";
+        });
+      });
+
+      // function displayGeneratedQuiz(questions) {
+      //   // Clear previous generated quiz if any
+      //   showGenQuiz.innerHTML = "";
+
+      //   questions.forEach((question, index) => {
+      //     const questionDiv = document.createElement("div");
+      //     questionDiv.className = "generated-question";
+      //     questionDiv.innerHTML = `
+      //     <h5 class="card-title">Question ${index + 1}:</h5>
+      //     <p>${question.quizQuestion}</p>
+      //     <p>Option 1: ${question.option_1}</p>
+      //     <p>Option 2: ${question.option_2}</p>
+      //     <p>Option 3: ${question.option_3}</p>
+      //     <p>Option 4: ${question.option_4}</p>
+      //     <p>Correct Answer: Option ${question.correct_ans}</p>
+      // `;
+      //     showGenQuiz.appendChild(questionDiv);
+      //   });
+      // }
+      function displayGeneratedQuiz(questions) {
+        // Clear previous generated quiz if any
+        const showGenQuiz = document.getElementById("showGenQuiz");
+        showGenQuiz.innerHTML = "";
+
+        questions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "generated-question";
+          questionDiv.innerHTML = `
+          <h5 class="card-title">Question ${index + 1}:</h5>
+          <p>${question.quizQuestion}</p>
+          <p>Option 1: ${question.option_1}</p>
+          <p>Option 2: ${question.option_2}</p>
+          <p>Option 3: ${question.option_3}</p>
+          <p>Option 4: ${question.option_4}</p>
+          <p>Correct Answer: Option ${question.correctAns}</p>
+      `;
+          showGenQuiz.appendChild(questionDiv);
+        });
+      }
+
+      // Create a function to fetch and display the generated quiz
+      function fetchAndDisplayGeneratedQuiz() {
+        console.log("In fetch and Display function");
+        const quizTopicInput = document.getElementById("genQuizTopic");
+        const noOfQuestionsInput = document.getElementById("noOfQuestions");
+
+        const quizTopic = quizTopicInput.value;
+        const noOfQuestions = noOfQuestionsInput.value;
+
+        console.log("quizTopic" + quizTopic + " ,noOfQuestion" + noOfQuestions);
+
+        fetch("http://localhost:5000/generate_quiz", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Adjust the content type if needed
+          },
+          body: JSON.stringify({
+            quiz_topic: quizTopic,
+            no_of_questions: noOfQuestions,
+          }),
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            console.log(data);
+            jsonData = JSON.parse(data);
+            // Check if the response is an array
+            if (Array.isArray(jsonData)) {
+              // Display the quiz questions to the user
+              for (const quizQuestion of jsonData) {
+                console.log(quizQuestion.quizQuestion);
+                console.log("Option 1:", quizQuestion.option_1);
+                console.log("Option 2:", quizQuestion.option_2);
+                console.log("Option 3:", quizQuestion.option_3);
+                console.log("Option 4:", quizQuestion.option_4);
+              }
+              displayGeneratedQuiz(jsonData);
+              // After fetching and displaying the generated quiz data
+              localStorage.setItem("generatedQuiz", JSON.stringify(jsonData));
+            } else {
+              // Display an error message
+              console.error(
+                "Invalid response from the server. Expected an array."
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      const addQuizButton = document.getElementById("genSubmitQuiz");
+      addQuizButton.addEventListener("click", function () {
+        // Retrieve the saved generated quiz data from localStorage
+        const savedQuizData = localStorage.getItem("generatedQuiz");
+
+        if (savedQuizData) {
+          // Parse the JSON data
+          const quizData = JSON.parse(savedQuizData);
+
+          // Send the quiz data to the API endpoint
+          fetch("http://localhost:8080/addQuestionList", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(quizData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Handle the response from the server
+              console.log(data);
+
+              // Optionally, you can clear the saved quiz data from localStorage
+              localStorage.removeItem("generatedQuiz");
+              alert("Successfully Added");
+            })
+            .catch((error) => {
+              alert("Failed to Added");
+              console.error("Error:", error);
+            });
+        } else {
+          console.error("No saved quiz data found in localStorage.");
+        }
+      });
+
+      // Add a click event listener to the "Generate Quiz" button
+      const genQuizButton = document.getElementById("genQuiz");
+      genQuizButton.addEventListener("click", function () {
+        // Call the fetchAndDisplayGeneratedQuiz function when the button is clicked
+        fetchAndDisplayGeneratedQuiz();
+      });
+
+      function deleteQuestion(id) {
+        // Send a request to delete the question by ID
+        fetch(`http://localhost:8080/deleteQuiz/${id}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Handle the response from the server (e.g., remove the deleted question)
+            console.log(data);
+            // You may also want to refresh the displayed questions
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const addQuizLink = document.getElementById("addQuizLink");
+        const showQuizLink = document.getElementById("showQuizLink");
+        const addQuizForm = document.getElementById("addQuizForm");
+        const showQuiz = document.getElementById("showQuiz");
+        const quizTopics = document.getElementById("quizTopics");
+        const generateQuiz = document.getElementById("generateQuiz");
+
+        addQuizLink.addEventListener("click", function () {
+          addQuizForm.classList.remove("hidden");
+          showQuiz.classList.add("hidden");
+          generateQuiz.classList.add("hidden");
+        });
+
+        generateQuizLink.addEventListener("click", function () {
+          generateQuiz.classList.remove("hidden");
+          addQuizForm.classList.add("hidden");
+          showQuiz.classList.add("hidden");
+        });
+
+        showQuizLink.addEventListener("click", function () {
+          showQuiz.classList.remove("hidden");
+          addQuizForm.classList.add("hidden");
+          generateQuiz.classList.add("hidden");
+          fetchQuizTopics();
+        });
+
+        function fetchQuizTopics() {
+          // Fetch quiz topics from the server using AJAX or fetch
+          fetch("http://localhost:8080/getAllTopic")
+            .then((response) => response.json())
+            .then((data) => {
+              displayQuizTopics(data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+
+        function displayQuizTopics(topics) {
+          quizTopics.innerHTML = "";
+          topics.forEach((topic) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                          <div class="card-header">
+                              <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#${topic.replace(
+                                / /g,
+                                "_"
+                              )}">${topic}</button>
+                          </div>
+                          <div id="${topic.replace(
+                            / /g,
+                            "_"
+                          )}" class="collapse">
+                              <div class="card-body">
+                                  <!-- Quiz questions for this topic will be displayed here -->
+                              </div>
+                          </div>
+                      `;
+            quizTopics.appendChild(card);
+
+            const expandButton = card.querySelector("button");
+            expandButton.addEventListener("click", function () {
+              fetchQuizQuestions(topic);
+            });
+          });
+        }
+
+        function fetchQuizQuestions(topic) {
+          // Fetch quiz questions by topic from the server using AJAX or fetch
+          const selectedTopic = encodeURIComponent(topic);
+          fetch(
+            `http://localhost:8080/getQuestionByTopic?quizTopic=${selectedTopic}`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              displayQuizQuestions(topic, data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+
+        function displayQuizQuestions(topic, questions) {
+          const topicDiv = document.getElementById(topic.replace(/ /g, "_"));
+          const cardBody = topicDiv.querySelector(".card-body");
+          cardBody.innerHTML = "";
+
+          questions.forEach((question) => {
+            const questionCard = document.createElement("div");
+            questionCard.className = "card mb-3";
+            questionCard.innerHTML = `
+                          <div class="card-body">
+                              <h5 class="card-title">${
+                                question.quizQuestion
+                              }</h5>
+                              <p class="card-text">Option 1: ${
+                                question.option_1
+                              }</p>
+                              <p class="card-text">Option 2: ${
+                                question.option_2
+                              }</p>
+                              <p class="card-text">Option 3: ${
+                                question.option_3
+                              }</p>
+                              <p class="card-text">Option 4: ${
+                                question.option_4
+                              }</p>
+                              <p class="card-text">Correct Answer: Option ${
+                                question.correctAns + 1
+                              }</p>
+                              <button class="btn btn-danger" onclick="deleteQuestion(${
+                                question.id
+                              })">Delete</button>
+                          </div>
+                      `;
+            cardBody.appendChild(questionCard);
+          });
+        }
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const addQuizLink = document.getElementById("addQuizLink");
+        const showQuizLink = document.getElementById("showQuizLink");
+        const addQuizForm = document.getElementById("addQuizForm");
+        const showQuiz = document.getElementById("showQuiz");
+        const quizForm = document.getElementById("quizForm");
+        const questionsContainer =
+          document.getElementById("questionsContainer");
+        const addQuestionButton = document.getElementById("addQuestion");
+        const submitQuizButton = document.getElementById("submitQuiz");
+
+        addQuizLink.addEventListener("click", function () {
+          addQuizForm.classList.remove("hidden");
+          showQuiz.classList.add("hidden");
+        });
+
+        showQuizLink.addEventListener("click", function () {
+          showQuiz.classList.remove("hidden");
+          addQuizForm.classList.add("hidden");
+          // You can fetch and display existing quizzes here
+        });
+
+        let questionCounter = 0;
+
+        addQuestionButton.addEventListener("click", function () {
+          questionCounter++;
+          const questionDiv = document.createElement("div");
+          questionDiv.innerHTML = `
+                        <label for="question${questionCounter}">Question ${questionCounter}:</label>
+                        <input type="text" id="question${questionCounter}" name="question${questionCounter}">
+                        <br />
+                        <label for="option1">Option 1:</label>
+                        <input type="text" id="option1${questionCounter}" name="option1${questionCounter}">
+                        <label for="option2">Option 2:</label>
+                        <input type="text" id="option2${questionCounter}" name="option2${questionCounter}">
+                        <label for="option3">Option 3:</label>
+                        <input type="text" id="option3${questionCounter}" name="option3${questionCounter}">
+                        <label for="option"4>Option 4:</label>
+                        <input type="text" id="option4${questionCounter}" name="option4${questionCounter}">
+                        <label for="correctOption${questionCounter}">Correct Option:</label>
+                        <select id="correctOption${questionCounter}" name="correctOption${questionCounter}">
+                            <option value="0">Option 1</option>
+                            <option value="1">Option 2</option>
+                            <option value="2">Option 3</option>
+                            <option value="3">Option 4</option>
+                        </select>
+                    `;
+
+          questionsContainer.appendChild(questionDiv);
+        });
+
+        submitQuizButton.addEventListener("click", function () {
+          // Gather quiz data and send it to the server using fetch or AJAX
+          const quizTopic = document.getElementById("quizTopic").value;
+          const questions = [];
+
+          for (let i = 1; i <= questionCounter; i++) {
+            const question = document.getElementById(`question${i}`).value;
+            const option1 = document.getElementById(`option1${i}`).value;
+            const option2 = document.getElementById(`option2${i}`).value;
+            const option3 = document.getElementById(`option3${i}`).value;
+            const option4 = document.getElementById(`option4${i}`).value;
+            const correctOption = document.getElementById(
+              `correctOption${i}`
+            ).value;
+
+            questions.push({
+              //   id: i,
+              quizQuestion: question,
+              option_1: option1,
+              option_2: option2,
+              option_3: option3,
+              option_4: option4,
+              correctAns: parseInt(correctOption) + 1,
+              quizTopic: quizTopic,
+            });
+          }
+
+          // Send the 'questions' array to your server using fetch or AJAX
+          // Example fetch:
+          fetch("http://localhost:8080/addQuestionList", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(questions),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Handle the response from the server
+              console.log(data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

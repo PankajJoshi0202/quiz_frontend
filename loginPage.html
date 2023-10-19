@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Login</title>
+    <style>
+      /* Add your CSS styles here */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      h2 {
+        text-align: center;
+      }
+      .tabs {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .tabs button {
+        flex: 1;
+        padding: 10px;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+      }
+      .tabs button.active {
+        background-color: #007bff;
+        color: #fff;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      button[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Quiz App Minor Project</h2>
+      <div class="tabs">
+        <button id="signupTab" class="active">Signup</button>
+        <button id="signinTab">Signin</button>
+      </div>
+      <form id="signupForm">
+        <label for="user_name">Username:</label>
+        <input type="text" id="user_name" name="user_name" required />
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+
+        <label for="email_id">Email:</label>
+        <input type="email" id="email_id" name="email_id" required />
+
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <form id="signinForm" style="display: none">
+        <label for="signin_user_name">Username:</label>
+        <input
+          type="text"
+          id="signin_user_name"
+          name="signin_user_name"
+          required
+        />
+
+        <label for="signin_password">Password:</label>
+        <input
+          type="password"
+          id="signin_password"
+          name="signin_password"
+          required
+        />
+
+        <button type="submit">Sign In</button>
+      </form>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const signupTab = document.getElementById("signupTab");
+        const signinTab = document.getElementById("signinTab");
+        const signupForm = document.getElementById("signupForm");
+        const signinForm = document.getElementById("signinForm");
+
+        signupTab.addEventListener("click", function () {
+          signupTab.classList.add("active");
+          signinTab.classList.remove("active");
+          signupForm.style.display = "block";
+          signinForm.style.display = "none";
+        });
+
+        signinTab.addEventListener("click", function () {
+          signinTab.classList.add("active");
+          signupTab.classList.remove("active");
+          signinForm.style.display = "block";
+          signupForm.style.display = "none";
+        });
+
+        signupForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Get the form data
+          const formData = new FormData(signupForm);
+
+          const userName = formData.get("user_name");
+          const password = formData.get("password");
+
+          if (userName == "admin" && password == "admin") {
+            alert(
+              `Signup Not allowed for !\nUsername: ${userName}\nPassword: ${password}`
+            );
+          } else {
+            // Make a POST request to the signup endpoint
+            fetch("http://localhost:8080/signUp", {
+              method: "POST",
+              body: JSON.stringify({
+                userName: formData.get("user_name"),
+                password: formData.get("password"),
+                email: formData.get("email_id"),
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                // Handle the response data as needed
+                // alert("Signup successful!");
+                if (data.id && data.userName) {
+                  // Handle the response data as needed
+                  alert(
+                    `Signup successful!\nUser ID: ${data.id}\nUser Name: ${data.userName}`
+                  );
+                  // Store user_id and username in localStorage
+                  localStorage.setItem("user_id", data.id);
+                  localStorage.setItem("username", data.userName);
+
+                  // Redirect to index.html
+                  window.location.href = "index.html";
+                } else {
+                  alert("Signup failed. User ID or User Name not provided.");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                // Handle errors here
+              });
+          }
+        });
+
+        signinForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Get the form data
+          const formData = new FormData(signinForm);
+
+          // Create a URLSearchParams object to encode the form data
+          const params = new URLSearchParams(formData);
+
+          const userName = formData.get("signin_user_name");
+          const password = formData.get("signin_password");
+
+          console.log(params.toString());
+          console.log("userName", userName);
+          console.log("password", password);
+
+          if (userName == "admin" && password == "admin") {
+            alert(`Succefully Signed-In as admin `);
+            window.location.href = "adminPage.html";
+          } else {
+            // Make a GET request to the signin endpoint
+            fetch(
+              `http://localhost:8080/signIn?userName=${userName}&password=${password}`,
+              {
+                method: "GET",
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.id && data.userName) {
+                  // Handle the response data as needed
+                  alert(
+                    `Signin successful!\nUser ID: ${data.id}\nUser Name: ${data.userName}`
+                  );
+                  // Store user_id and username in localStorage
+                  localStorage.setItem("user_id", data.id);
+                  localStorage.setItem("username", data.userName);
+
+                  // Redirect to index.html
+                  window.location.href = "index.html";
+                } else {
+                  alert("Signin failed. User ID or User Name not provided.");
+                }
+              });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
